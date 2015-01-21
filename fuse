@@ -1,0 +1,21 @@
+#!/usr/bin/env python
+
+import requests
+from hot.utils.auth import OSAuth
+
+def fusion_flush_cache(regions):
+    auth = OSAuth()
+    for region in regions:
+        print "flushing cache for region {}...".format(region)
+        heat_url = auth.keystone_client.service_catalog.url_for(
+                        service_type='orchestration',
+                        endpoint_type='publicURL', region_name=region)
+        headers = { 'X-Auth-Token': auth.get_token(),
+                    'Accept': 'application/json' }
+        template_url = heat_url + '/templates'
+        r = requests.delete(template_url, headers=headers)
+        print "{} responded with {}:".format(template_url, r.status_code)
+        print r.text, "\n----"
+
+if __name__ == "__main__":
+    fusion_flush_cache(["DFW", "ORD", "IAD", "HKG"])
